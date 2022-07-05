@@ -1,0 +1,4 @@
+# Monsters
+# template_id   name    glyph   color   attack  health  initiative  
+player          Player  @       #FFFFFF 10      100     10
+orc             Orc     o       #00FF00 5       25      5
