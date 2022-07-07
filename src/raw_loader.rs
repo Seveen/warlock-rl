@@ -97,7 +97,7 @@ peg::parser!(
 
         rule attack() -> Attack = attack:(i64()) { Attack(attack) }
         rule health() -> Health = health:(i64()) { Health(health) }
-        rule initiative() -> Initiative = initiative:(i64()) { Initiative(initiative) }
+        rule initiative() -> Initiative = initiative:(u32()) { Initiative(initiative) }
 
         rule glyph() -> Glyph = character:([_]) _ color:(color()) { Glyph { character, color } }
         rule color() -> Color = "#" color:$(hex()*<6>) {? Color::hex(color).or(Err("Color error")) }
@@ -106,6 +106,7 @@ peg::parser!(
         rule character() -> char = character:(['a'..='z' | 'A'..='Z' | '_']) { character }
 
         rule i64() -> i64 = digits:$(digit()+) {? digits.parse::<i64>().or(Err("Digits error")) }
+        rule u32() -> u32 = digits:$(digit()+) {? digits.parse::<u32>().or(Err("Digits error")) }
 
         rule hex() -> char = hex:(['0'..='9' | 'A'..='F']) { hex }
         rule digit() -> char = digit:(['0'..='9']) { digit }

@@ -18,7 +18,7 @@ pub fn collision(
             if moved_id == entity_at {
                 continue;
             }
-            
+
             if future_state.get_solid(entity_at).is_some() {
                 if future_state.get_health(entity_at).is_some() {
                     reactions.push(ActionType::DamageEntity {
@@ -26,10 +26,14 @@ pub fn collision(
                         target_id: entity_at,
                         cost: 0,
                     });
-                    println!("Attacking {entity_at:?} at pos: {new_position:?}");
+                    if let Some(name) = state.get_name(entity_at) {
+                        println!("Attacking {name} {entity_at} at pos: {new_position:?}");
+                    }
                     return (ActionStatus::Reject, RuleStatus::StopChecking, reactions);
                 }
-                println!("Bumped on {entity_at:?} at pos: {new_position:?}");
+                if let Some(name) = state.get_name(entity_at) {
+                    println!("Bumped on {name} {entity_at} at pos: {new_position:?}");
+                }
                 return (ActionStatus::Reject, RuleStatus::StopChecking, reactions);
             }
         }
@@ -40,13 +44,15 @@ pub fn collision(
 
 pub fn death(
     action: &Action,
-    _state: &GameState,
+    state: &GameState,
     _spatial_position: &RTree<PositionTreeObject>,
 ) -> (ActionStatus, RuleStatus, Vec<ActionType>) {
     let mut reactions = Vec::new();
     for (&id, &health) in action.get_updated_health() {
         if health.0 <= 0 {
-            println!("Rule: Jean-Michel {:?} is canning!", id);
+            if let Some(name) = state.get_name(id) {
+                println!("{name} {id} is dying!");
+            }
             reactions.push(ActionType::Die {
                 entity_id: id,
                 cost: 0,
@@ -59,18 +65,21 @@ pub fn death(
 
 pub fn compute_energy_cost(
     action: &Action,
-    _state: &GameState,
+    state: &GameState,
     _spatial_position: &RTree<PositionTreeObject>,
 ) -> (ActionStatus, RuleStatus, Vec<ActionType>) {
     let mut reactions = Vec::new();
 
     for (&id, &action_cost) in action.get_updated_actioncost() {
         if action_cost.0 != 0 {
-            println!("{:?}'s action cost {}", id, action_cost.0);
-            reactions.push(ActionType::DecreaseEnergy {
-                entity_id: id,
-                value: action_cost.0,
-            });
+            if let Some(initiative) = state.get_initiative(id) {
+                let ratio = 100 / initiative.0;
+                let action_cost = action_cost.0 * ratio;
+                reactions.push(ActionType::DecreaseEnergy {
+                    entity_id: id,
+                    value: action_cost,
+                });
+            }
         }
     }
 

@@ -1,11 +1,11 @@
 use bevy::prelude::{Color, Component};
 use bevy_inspector_egui::Inspectable;
-use derive_more::{From, Into};
+use derive_more::{From, Into, Display};
 use rstar::Point;
 use rule_system::register_components;
 
 #[derive(
-    Debug, Clone, Copy, Eq, PartialEq, Hash, Component, Inspectable, Serialize, Deserialize,
+    Debug, Clone, Copy, Eq, PartialEq, Hash, Component, Inspectable, Serialize, Deserialize, Display
 )]
 pub struct EntityId(pub u64);
 
@@ -44,16 +44,16 @@ impl Point for Position {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Display, Into, From)]
 pub struct Attack(pub i64);
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Display, Into, From)]
 pub struct Health(pub i64);
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
-pub struct Initiative(pub i64);
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Display, Into, From)]
+pub struct Initiative(pub u32);
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Display, Into, From)]
 pub struct Name(pub String);
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -74,10 +74,10 @@ pub struct Item;
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct CarriedBy(pub EntityId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, From)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Display, Into, From)]
 pub struct Energy(pub i64);
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Into, From)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Display, Into, From)]
 pub struct ActionCost(pub u32);
 
 register_components!(

@@ -85,7 +85,7 @@ pub fn populate_action(
             damage_entity(action, state, attacker_id, target_id);
         }
         ActionType::Die { entity_id, .. } => {
-            die(action, entity_id);
+            die(action, state, entity_id);
         }
         ActionType::CreateItem {
             entity_id,
@@ -150,21 +150,19 @@ fn damage_entity(
     if let Some(attack) = state.get_attack(attacker_id) {
         if let Some(health) = state.get_health(target_id) {
             let new_health = health.0 - attack.0;
-            println!(
-                "Action: {} is hitting {} for {} damage! {} is now {} HP",
-                attacker_id.0, target_id.0, attack.0, target_id.0, new_health
-            );
+            if let (Some(attacker_name), Some(target_name)) =
+                (state.get_name(attacker_id), state.get_name(target_id))
+            {
+                println!(
+                    "{attacker_name} {attacker_id} is hitting {target_name} {target_id} for {attack} damage! {target_name} {target_id} is now at {new_health} HP"
+                );
+            }
             action.insert_health(target_id, Health(new_health));
         }
     }
 }
 
-fn wait(
-    action: &mut Action,
-    entity_id: EntityId,
-    cost: u32,
-) {
-    println!("Action: wait at cost {}", cost);
+fn wait(action: &mut Action, entity_id: EntityId, cost: u32) {
     action.insert_actioncost(entity_id, cost.into());
 }
 
@@ -188,8 +186,10 @@ fn move_by(
     }
 }
 
-fn die(action: &mut Action, entity_id: EntityId) {
-    println!("Action: {:?} died", entity_id);
+fn die(action: &mut Action, state: &GameState, entity_id: EntityId) {
+    if let Some(name) = state.get_name(entity_id) {
+        println!("{name} {entity_id} died");
+    }
     action.remove_all(entity_id);
 }
 
@@ -203,6 +203,9 @@ fn grab_item(
         for &PositionTreeObject { entity_at, .. } in spatial_position.locate_all_at_point(&position)
         {
             if state.get_item(entity_at).is_some() {
+                if let (Some(grabber_name), Some(grabbed_name)) = (state.get_name(grabber_id), state.get_name(entity_at)) {
+                    println!("{grabber_name} grabbed {grabbed_name}");
+                }
                 action.remove_position(entity_at);
                 action.insert_carriedby(entity_at, CarriedBy(grabber_id));
             }
@@ -211,7 +214,6 @@ fn grab_item(
 }
 
 fn decrease_energy(action: &mut Action, state: &GameState, entity_id: EntityId, value: u32) {
-    println!("Decreasing energy of {:?} : {:?}", entity_id, value);
     if let Some(energy) = state.get_energy(entity_id) {
         action.insert_actioncost(entity_id, 0.into());
         let new_energy = energy.0 - i64::from(value);
