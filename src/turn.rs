@@ -42,7 +42,7 @@ fn turn_order(mut next_action: ResMut<NextAction>, mut world: ResMut<Game>) {
     let mut rng = rand::thread_rng();
 
     if let Some(&player_id) = world.state.player.keys().next() {
-        for _ in 0..=10 {
+        for _ in 0..10 {
             let mut should_process_entities = false;
 
             if let Some(&energy) = world.state.get_energy(player_id) {
@@ -59,7 +59,7 @@ fn turn_order(mut next_action: ResMut<NextAction>, mut world: ResMut<Game>) {
 
             if should_process_entities {
                 for energy in world.state.energy.values_mut() {
-                    energy.0 += 5;
+                    energy.0 += 50;
                 }
 
                 let mut entities = vec![];
